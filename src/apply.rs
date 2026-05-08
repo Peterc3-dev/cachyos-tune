@@ -36,6 +36,22 @@ pub fn apply_profile(profile: &Profile) -> Result<()> {
         }
     }
 
+    // Optional dirty page timing controls
+    if let Some(expire) = profile.dirty_expire_centisecs {
+        let value = expire.to_string();
+        match sysfs::write_sysctl("vm.dirty_expire_centisecs", &value) {
+            Ok(()) => style::print_applied("vm.dirty_expire_centisecs", &value, ""),
+            Err(e) => errors.push(format!("vm.dirty_expire_centisecs: {}", e)),
+        }
+    }
+    if let Some(writeback) = profile.dirty_writeback_centisecs {
+        let value = writeback.to_string();
+        match sysfs::write_sysctl("vm.dirty_writeback_centisecs", &value) {
+            Ok(()) => style::print_applied("vm.dirty_writeback_centisecs", &value, ""),
+            Err(e) => errors.push(format!("vm.dirty_writeback_centisecs: {}", e)),
+        }
+    }
+
     // Transparent hugepages
     match sysfs::write_sysfs("/sys/kernel/mm/transparent_hugepage/enabled", &profile.transparent_hugepages) {
         Ok(()) => style::print_applied("transparent_hugepages", &profile.transparent_hugepages, ""),
@@ -100,6 +116,8 @@ pub fn apply_snapshot(snap: &crate::snapshot::Snapshot) -> Result<()> {
         ("vm.vfs_cache_pressure", &snap.vfs_cache_pressure),
         ("vm.dirty_ratio", &snap.dirty_ratio),
         ("vm.dirty_background_ratio", &snap.dirty_background_ratio),
+        ("vm.dirty_expire_centisecs", &snap.dirty_expire_centisecs),
+        ("vm.dirty_writeback_centisecs", &snap.dirty_writeback_centisecs),
     ] {
         match sysfs::write_sysctl(key, value) {
             Ok(()) => style::print_applied(key, value, ""),

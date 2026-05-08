@@ -6,6 +6,7 @@ use std::fmt;
 pub enum ProfileName {
     Default,
     MlInference,
+    MlTraining,
     Gaming,
     Battery,
     Compile,
@@ -16,6 +17,7 @@ impl fmt::Display for ProfileName {
         match self {
             ProfileName::Default => write!(f, "default"),
             ProfileName::MlInference => write!(f, "ml-inference"),
+            ProfileName::MlTraining => write!(f, "ml-training"),
             ProfileName::Gaming => write!(f, "gaming"),
             ProfileName::Battery => write!(f, "battery"),
             ProfileName::Compile => write!(f, "compile"),
@@ -31,6 +33,8 @@ pub struct Profile {
     pub vfs_cache_pressure: u32,
     pub dirty_ratio: u32,
     pub dirty_background_ratio: u32,
+    pub dirty_expire_centisecs: Option<u32>,
+    pub dirty_writeback_centisecs: Option<u32>,
     pub transparent_hugepages: String,
     pub zram_comp_algorithm: String,
     pub gpu_power_profile: String,
@@ -47,6 +51,8 @@ impl Profile {
             vfs_cache_pressure: 100,
             dirty_ratio: 20,
             dirty_background_ratio: 10,
+            dirty_expire_centisecs: None,
+            dirty_writeback_centisecs: None,
             transparent_hugepages: "madvise".into(),
             zram_comp_algorithm: "zstd".into(),
             gpu_power_profile: "auto".into(),
@@ -61,8 +67,10 @@ impl Profile {
             cpu_governor: "performance".into(),
             swappiness: 30,
             vfs_cache_pressure: 50,
-            dirty_ratio: 60,
-            dirty_background_ratio: 30,
+            dirty_ratio: 10,
+            dirty_background_ratio: 5,
+            dirty_expire_centisecs: Some(3000),
+            dirty_writeback_centisecs: Some(500),
             transparent_hugepages: "always".into(),
             zram_comp_algorithm: "lz4".into(),
             gpu_power_profile: "high".into(),
@@ -79,6 +87,8 @@ impl Profile {
             vfs_cache_pressure: 50,
             dirty_ratio: 20,
             dirty_background_ratio: 10,
+            dirty_expire_centisecs: None,
+            dirty_writeback_centisecs: None,
             transparent_hugepages: "never".into(),
             zram_comp_algorithm: "lz4".into(),
             gpu_power_profile: "high".into(),
@@ -95,6 +105,8 @@ impl Profile {
             vfs_cache_pressure: 100,
             dirty_ratio: 10,
             dirty_background_ratio: 5,
+            dirty_expire_centisecs: None,
+            dirty_writeback_centisecs: None,
             transparent_hugepages: "madvise".into(),
             zram_comp_algorithm: "zstd".into(),
             gpu_power_profile: "low".into(),
@@ -109,8 +121,10 @@ impl Profile {
             cpu_governor: "performance".into(),
             swappiness: 30,
             vfs_cache_pressure: 50,
-            dirty_ratio: 60,
-            dirty_background_ratio: 30,
+            dirty_ratio: 15,
+            dirty_background_ratio: 10,
+            dirty_expire_centisecs: None,
+            dirty_writeback_centisecs: None,
             transparent_hugepages: "always".into(),
             zram_comp_algorithm: "lz4".into(),
             gpu_power_profile: "auto".into(),
@@ -119,10 +133,29 @@ impl Profile {
         }
     }
 
+    pub fn ml_training() -> Self {
+        Profile {
+            name: ProfileName::MlTraining,
+            cpu_governor: "performance".into(),
+            swappiness: 30,
+            vfs_cache_pressure: 50,
+            dirty_ratio: 15,
+            dirty_background_ratio: 5,
+            dirty_expire_centisecs: Some(3000),
+            dirty_writeback_centisecs: Some(500),
+            transparent_hugepages: "always".into(),
+            zram_comp_algorithm: "lz4".into(),
+            gpu_power_profile: "high".into(),
+            io_scheduler: "none".into(),
+            tcp_congestion: "bbr".into(),
+        }
+    }
+
     pub fn from_name(name: ProfileName) -> Self {
         match name {
             ProfileName::Default => Self::default_profile(),
             ProfileName::MlInference => Self::ml_inference(),
+            ProfileName::MlTraining => Self::ml_training(),
             ProfileName::Gaming => Self::gaming(),
             ProfileName::Battery => Self::battery(),
             ProfileName::Compile => Self::compile(),
@@ -133,6 +166,7 @@ impl Profile {
         vec![
             Self::default_profile(),
             Self::ml_inference(),
+            Self::ml_training(),
             Self::gaming(),
             Self::battery(),
             Self::compile(),
