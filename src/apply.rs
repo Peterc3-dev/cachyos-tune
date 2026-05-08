@@ -119,6 +119,9 @@ pub fn apply_snapshot(snap: &crate::snapshot::Snapshot) -> Result<()> {
         ("vm.dirty_expire_centisecs", &snap.dirty_expire_centisecs),
         ("vm.dirty_writeback_centisecs", &snap.dirty_writeback_centisecs),
     ] {
+        if value == "?" {
+            continue;
+        }
         match sysfs::write_sysctl(key, value) {
             Ok(()) => style::print_applied(key, value, ""),
             Err(e) => errors.push(format!("{}: {}", key, e)),
