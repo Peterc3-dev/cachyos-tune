@@ -1,7 +1,7 @@
 /// Phosphor-green ANSI color codes.
-const GREEN: &str = "\x1b[38;2;57;255;20m";
-const DIM_GREEN: &str = "\x1b[38;2;30;140;10m";
-const BRIGHT_GREEN: &str = "\x1b[38;2;100;255;80m";
+const GREEN: &str = "\x1b[38;2;0;255;200m";
+const DIM_GREEN: &str = "\x1b[38;2;0;128;100m";
+const BRIGHT_GREEN: &str = "\x1b[38;2;160;255;230m";
 const YELLOW: &str = "\x1b[38;2;200;200;40m";
 const RED: &str = "\x1b[38;2;255;80;60m";
 const BOLD: &str = "\x1b[1m";
